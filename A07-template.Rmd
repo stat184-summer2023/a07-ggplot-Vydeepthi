@@ -1,7 +1,7 @@
 ---
 title: "A07- ggplot"
-author: "YOUR NAME"
-date: "DATE"
+author: "Vydeepthi Dhulipalla"
+date: "June 8,2023"
 output: html_notebook
 ---
 
@@ -69,6 +69,20 @@ When you make your plot, you will likely find that the axis range is being set b
 
 ```{r}
 ### Your code here
+# Calculate the duration of rental events
+Trips <- Trips %>%   # Update the Trips dataset
+  mutate(duration = as.numeric(edate - sdate))
+
+# Filter out outliers
+quantile_cutoff <- quantile(Trips$duration, 0.99)  # Calculate the 99th percentile
+Trips_filtered <- Trips %>%   # Create a new dataset with filtered data
+  filter(duration < quantile_cutoff)
+
+# Create the box-and-whisker plot
+ggplot(data = Trips_filtered, aes(x = client, y = duration/60)) +   # Specify the dataset and mapping variables
+  geom_boxplot() +   # Add the box-and-whisker plot layer
+  ylab("Duration (minutes)") +   # Set the y-axis label
+  xlab("Client Type")   # Set the x-axis label
 
 
 ```
@@ -102,56 +116,122 @@ You can use [Figure 18.3](https://dtkaplan.github.io/DataComputingEbook/project-
 ### Day of Year
 
 ```{r}
-### Your Code Here
+Trips %>%
+  ggplot(aes(x = lubridate::yday(sdate))) +
+  geom_histogram(binwidth = 1, fill = "lightblue", color = "black") +
+  xlab("Day of the Year") +
+  ylab("Count") +
+  ggtitle("Bike Use by Day of the Year")
+
 
 ```
 
 
-My observations here..... 
 
+```{r}
+observation1 <- "The graph shows how often bikes are used at different times of the year. It looks like there aren't as many bike rentals in the winter (between day 300 and day 360) as there are the rest of the year. Around day 200, there seems to be a lot of bike action, which is when the usage seems to peak."
+cat(observation1)
+```
 
 ### Day of Week
 
 ```{r}
-### Your Code Here
+Trips %>%
+  ggplot(aes(x = lubridate::wday(sdate))) +
+  geom_histogram(binwidth = 1, fill = "lightblue", color = "black") +
+  scale_x_continuous(breaks = 1:7, labels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")) +
+  xlab("Day of the Week") +
+  ylab("Count") +
+  ggtitle("Bike Use by Day of the Week")
+
 
 ```
 
 
-My observations here..... 
+```{r}
+observation2 <- "The graph shows how often people ride bikes on different days of the week. It looks like more people rent bikes Monday through Friday than on the weekends (Saturday and Sunday). This means that most people use the bike-sharing system to get to and from work or school."
+
+cat(observation2)
+```
 
 
 
 ### Hour of Day
 
 ```{r}
-### Your Code Here
+Trips %>%
+  ggplot(aes(x = lubridate::hour(sdate))) +
+  geom_histogram(binwidth = 1, fill = "lightblue", color = "black") +
+  xlab("Hour of the Day") +
+  ylab("Count") +
+  ggtitle("Bike Use by Hour of the Day")
 
 ```
 
 
 My observations here..... 
 
+```{r}
+observation3 <- "The histogram shows how many bike hires are made at different times of the day. It has a two-peak schedule, with the most people riding bikes during rush hour in the morning (around 8–9 am) and in the evening (around 5–6 pm). This shows that people who commute to and from work use the bike-sharing system a lot."
+cat(observation3)
+```
 
 
 ### Minute of Hour
 
 ```{r}
-### Your Code Here
+Trips %>%
+  ggplot(aes(x = lubridate::minute(sdate))) +
+  geom_density(fill = "lightblue", color = "black") +
+  xlab("Minute in the Hour") +
+  ylab("Density") +
+  ggtitle("Bike Use by Minute in the Hour")
 
 ```
 
 
-My observations here..... 
-
+```{r}
+observation4 <- "The density plot shows how many bike rentals there are during each hour. It shows that bike use is pretty even across the minutes in an hour, which means that no one minute is much more popular than the others. This means that there are an equal number of bike hires every hour."
+cat(observation4)
+```
 
 ## Question 3: Grouping
 
 Group the bike rentals by three variables: hour of the day, day of the week, and client type. Find the total number of events in each grouping and plot this count versus hour. Use the group aesthetic to represent one of the other variables and faceting to represent the other. Comment on any general trends you see.
 
 ```{r}
-### My Code here
+# Load required packages
+library(dplyr)
+library(ggplot2)
 
+# Extract hour of the day from sdate
+Trips$hour <- lubridate::hour(Trips$sdate)
+
+# Extract day of the week from sdate
+Trips$day_of_week <- lubridate::wday(Trips$sdate, label = TRUE)
+
+# Group the data by hour, day of the week, and client type and calculate the count
+grouped_data <- Trips %>%
+  group_by(hour, day_of_week, client) %>%
+  summarise(count = n())
+
+# Plot the count versus hour, faceted by day of the week and colored by client type
+ggplot(grouped_data, aes(x = hour, y = count, fill = client)) +
+  geom_col(position = "stack") +
+  facet_wrap(~day_of_week, nrow = 1) +
+  labs(x = "Hour of the Day", y = "Count") +
+  scale_fill_manual(values = c("blue", "orange"), labels = c("Regular", "Casual")) +
+  theme_minimal()
+
+
+```
+```{r}
+comment1 <- "Hourly Usage: The graph shows that bike rentals tend to follow a two-peak trend throughout the day, with peaks around 8–9 a.m. and 5–6 p.m., when most people are going to work or school. These peaks show that the bikes are used a lot during times when people usually commute.
+Weekdays vs. weekends: On weekdays (Monday through Friday), there are more rentals during the morning and evening rush hours, which is when people usually go to and from work. On the other hand, the rental counts on weekends seem to be spread out more evenly throughout the day, which suggests a more relaxed and not-related-to-commuting usage trend.
+Client Type: The color of the client shows if they are a regular or not. It can be seen that both regular and occasional clients use the site in ways that match the general trends listed above. Regular customers who have paid a yearly membership fee tend to use the bike rentals more during rush hour on weekdays. Casual customers who have paid for a five-day membership, on the other hand, use the bike rentals more evenly throughout the week.
+These trends show how much people want to rent bikes at different times and for different kinds of customers. They can help the bike-sharing system optimize bike spread, manage station capacity, and figure out what users want.
+"
+cat(comment1)
 ```
 
 My comments here.....
@@ -213,7 +293,21 @@ Our goal here is to recreate [Figure 18.5](https://dtkaplan.github.io/DataComput
 
 
 ```{r}
-### My code here
+StationPairs <- merge(Simple, Simple2, by = NULL)
+
+
+```
+```{r}
+PairDistances <- StationPairs %>%
+  mutate(distance = haversine(lat, long, lat2, long2)) %>%
+  select(sstation, estation, distance)
+
+```
+```{r}
+TripsWithDistances <- inner_join(Trips, PairDistances, by = c("sstation", "estation"))
+ggplot(TripsWithDistances, aes(x = distance)) +
+  geom_density(fill = "gray", color = "black") +
+  labs(x = "Ride Distance (km)", y = "Density")
 
 ```
 

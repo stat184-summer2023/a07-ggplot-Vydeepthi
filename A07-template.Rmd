@@ -310,7 +310,10 @@ ggplot(TripsWithDistances, aes(x = distance)) +
   labs(x = "Ride Distance (km)", y = "Density")
 
 ```
-
+```{r}
+answer <- "They are similar because they have kind of a shape similarity i.e as distance inccreaces the density goes to a peak and then decreases to the lowest value. But the similarity os not too high hence there might be other facts beyond station distances that may influence ride distances."
+cat(extra_credit)
+```
 
 
 
@@ -319,6 +322,15 @@ ggplot(TripsWithDistances, aes(x = distance)) +
 Look at the variables in `Stations` and `Trips` and explain why `Simple` and `Simple2` were given different variable names for the station. 
 
 Optional Extra credit answer here.....
+```{r}
+extra_credit <- "Different variable names were given to Simple and Simple2 for the station so that it would be clear which station was the starting station and which was the finishing station when the join operation was run.
+
+The variable in the Stations collection that stands for the name of the station is called name. But when you join the dataset to itself to make the pairs of stations, you need to include both the starting and finishing stations. In Simple, the variable name for the starting station is sstation, and in Simple2, the variable name for the finishing station is estation. This is done to avoid confusion and make the final dataset clear.
+
+By giving each variable a unique name, it's easier to find and refer to the right stations during the join process and any calculations that follow. This naming practice helps keep the dataset clear and avoid any confusion.
+"
+cat(extra_credit)
+```
 
 
 
